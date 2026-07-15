@@ -1,6 +1,7 @@
 package com.shrimpo.shrimpoftbquests.mixin;
 
 import com.mojang.datafixers.util.Pair;
+import com.shrimpo.shrimpoftbquests.Config;
 import com.shrimpo.shrimpoftbquests.client.ADTMHelper;
 import com.shrimpo.shrimpoftbquests.client.CodeTextField;
 import com.shrimpo.shrimpoftbquests.client.HRuleWidget;
@@ -48,7 +49,7 @@ public abstract class AddDescriptionTextMixin {
         for (int i = pageSpan.getFirst(); i <= pageSpan.getSecond() && i < quest.getDescription().size(); i++) {
             Component component = quest.getDescription().get(i);
 
-            boolean center = false;
+            boolean center = Config.CENTER_ALL_DESC.get();
             int headerLevel = 0;
             String plain = component.getString();
 

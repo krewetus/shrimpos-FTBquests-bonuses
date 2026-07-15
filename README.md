@@ -16,14 +16,15 @@ This mod adds so far:
 - Centering `=`
 - Horizontal Rule `---`
 - Code blocks `` `text` ``
+- Config that lets users make all text centered
 
 FTB Quests color tags `&a, &2` etc. work with Horizontal Rule and all text.
 
 -------------------------------------------------------
 
 ### Reviews:
-> so cool, 10/10 ~someone\
-> very needed. 9.5/10 ~someone else
+&gt; so cool, 10/10 ~someone\
+&gt; very needed. 9.5/10 ~someone else
 
 -------------------------------------------------------
 ### FAQ:
@@ -36,5 +37,8 @@ A: Only if I need to.
 Q: Can I use it in my modpack?\
 A: Feel free to do so!
 
+Q: I have an idea!
+A: Please submit it on GitHub!
+
 Q: `something` isn't working!\
-A: Please submit an issue on GitHub.
+A: Please submit an issue on GitHub...
