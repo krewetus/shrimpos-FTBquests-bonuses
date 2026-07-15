@@ -37,7 +37,7 @@ A: Only if I need to.
 Q: Can I use it in my modpack?\
 A: Feel free to do so!
 
-Q: I have an idea!
+Q: I have an idea!\
 A: Please submit it on GitHub!
 
 Q: `something` isn't working!\
