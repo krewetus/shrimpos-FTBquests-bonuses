@@ -2,7 +2,7 @@
 
 ---
 
-This small mod adds some of the Markdown formatting options.\
+This small mod adds some of the missing Markdown formatting options.\
 I will try my best to add most of them!\
 Works with `FTB Quests 2101.1.27` as of `15th July 2026`.\
 No idea about previous versions.
