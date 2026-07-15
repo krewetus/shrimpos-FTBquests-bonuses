@@ -93,3 +93,6 @@ shrimpo took his time to create some FTB Quests bonus things!
 # stop your mod loading on the server for example.
 #[features.${mod_id}]
 #openGLVersion="[3.2,)"
+
+[[mixins]]
+    config = "shrimposftbquestsbonuses.mixins.json"
