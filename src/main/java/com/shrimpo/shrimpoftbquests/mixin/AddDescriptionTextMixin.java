@@ -2,6 +2,7 @@ package com.shrimpo.shrimpoftbquests.mixin;
 
 import com.mojang.datafixers.util.Pair;
 import com.shrimpo.shrimpoftbquests.client.ADTMHelper;
+import com.shrimpo.shrimpoftbquests.client.CodeTextField;
 import com.shrimpo.shrimpoftbquests.client.HRuleWidget;
 import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
@@ -10,6 +11,8 @@ import dev.ftb.mods.ftbquests.util.TextUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.FormattedText;
+import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -40,6 +43,8 @@ public abstract class AddDescriptionTextMixin {
             panelText.add(new VerticalSpaceWidget(panelText, 7));
         }
 
+        Font font = Minecraft.getInstance().font;
+
         for (int i = pageSpan.getFirst(); i <= pageSpan.getSecond() && i < quest.getDescription().size(); i++) {
             Component component = quest.getDescription().get(i);
 
@@ -55,40 +60,60 @@ public abstract class AddDescriptionTextMixin {
             if (plain.startsWith("= ")) {
                 center = true;
                 component = stripPrefix(component, "= ");
-            } else if (plain.startsWith("# ")) {
-                headerLevel = 1;
-                component = stripPrefix(component, "# ");
+                plain = component.getString();
+            }
+
+            if (plain.startsWith("### ")) {
+                headerLevel = 3;
+                component = stripPrefix(component, "### ");
             } else if (plain.startsWith("## ")) {
                 headerLevel = 2;
                 component = stripPrefix(component, "## ");
-            } else if (plain.startsWith("### ")) {
-                headerLevel = 3;
-                component = stripPrefix(component, "### ");
+            } else if (plain.startsWith("# ")) {
+                headerLevel = 1;
+                component = stripPrefix(component, "# ");
             }
 
+            component = ADTMHelper.processInlineCode(component);
+
             if (headerLevel > 0) {
-                component = stripPrefix(component, headerLevel == 3 ? "### " : headerLevel == 2 ? "## " : "# ");
-                addHeader(canEdit, i, component, center, Minecraft.getInstance().font, headerLevel);
+                addHeader(canEdit, i, component, center, font, headerLevel);
                 continue;
             }
 
-            TextField field = new TextField(panelText)
-                    .setMaxWidth(panelText.width)
-                    .setSpacing(9)
-                    .setText(component);
-            field.setWidth(panelText.width);
-            if (center) {
-                field.addFlags(Theme.CENTERED);
-            }
-            panelText.add(field);
+            addNormal(component, center, font);
+        }
+    }
+
+    @Unique
+    private void addNormal(Component text, boolean center, Font font) {
+        int usableWidth = this.panelText.width - 6;
+        for (FormattedText fl : font.getSplitter().splitLines(text, usableWidth, Style.EMPTY)) {
+            Component lc = ADTMHelper.formattedTextToComponent(fl);
+            List<ADTMHelper.CodeBox> boxes = ADTMHelper.precomputeCodeBoxes(font, lc);
+            int centeringWidth = ADTMHelper.getCenteringWidth(font, lc);
+            int prefixWidth = ADTMHelper.getWidthNoPrefix(font, lc);
+            this.panelText.add(new CodeTextField(
+                    this.panelText,
+                    lc,
+                    center,
+                    centeringWidth,
+                    prefixWidth,
+                    boxes,
+                    font,
+                    usableWidth,
+                    3,
+                    0
+            ));
         }
     }
 
     @Unique
     public void addHeader(boolean canEdit, int line, Component text, boolean center, Font font, int level) {
         float scale = (level == 1) ? 1.5F : ((level == 2) ? 1.25F : 1.1F);
-        int textColor = (level == 1) ? -1 : ((level == 2) ? -855051 : -4867391);
+        int textColor = -1;
         int innerW = this.panelText.width - 6;
+        List<ADTMHelper.CodeBox> boxes = ADTMHelper.precomputeCodeBoxes(font, text);
         int centeringWidth = ADTMHelper.getCenteringWidth(font, text);
         int prefixWidth = ADTMHelper.getWidthNoPrefix(font, text);
         boolean addLine = (level == 5);
@@ -107,6 +132,7 @@ public abstract class AddDescriptionTextMixin {
                 center,
                 centeringWidth,
                 prefixWidth,
+                boxes,
                 addLine,
                 lineColor,
                 canEdit,
