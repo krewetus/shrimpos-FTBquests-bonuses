@@ -12,12 +12,12 @@ import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 
-@Mod(ShrimposFTBQuestsBonuses.MOD_ID)
-public class ShrimposFTBQuestsBonuses {
-    public static final String MOD_ID = "shrimposftbquestsbonuses";
+@Mod(ShrimposQuestingAdditions.MOD_ID)
+public class ShrimposQuestingAdditions {
+    public static final String MOD_ID = "shrimposquestingadditions";
     public static final Logger LOGGER = LogUtils.getLogger();
 
-    public ShrimposFTBQuestsBonuses(IEventBus modEventBus, ModContainer modContainer) {
+    public ShrimposQuestingAdditions(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
         NeoForge.EVENT_BUS.register(this);
     }
@@ -27,6 +27,6 @@ public class ShrimposFTBQuestsBonuses {
 
     @SubscribeEvent
     public void onServerStarting(ServerStartingEvent event) {
-        LOGGER.info("Shrimpo's FTB Quests Bonuses is loaded!");
+        LOGGER.info("shrimpo's questing additions is loaded!");
     }
 }

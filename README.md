@@ -1,25 +1,38 @@
+# shrimpo's questing additions
 
-Installation information
-=======
+---
 
-This template repository can be directly cloned to get you started with a new
-mod. Simply create a new repository cloned from this one, by following the
-instructions provided by [GitHub](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-repository-from-a-template).
+This small mod adds some of the Markdown formatting options.\
+I will try my best to add most of them!\
+Works with `FTB Quests 2101.1.27` as of `15th July 2026`.\
+No idea about previous versions.
 
-Once you have your clone, simply open the repository in the IDE of your choice. The usual recommendation for an IDE is either IntelliJ IDEA or Eclipse.
+---
 
-If at any point you are missing libraries in your IDE, or you've run into problems you can
-run `gradlew --refresh-dependencies` to refresh the local cache. `gradlew clean` to reset everything 
-{this does not affect your code} and then start the process again.
+## How to use?
+Please read [this wiki](https://www.markdownguide.org/cheat-sheet/) to learn how  to use Markdown formatting.
 
-Mapping Names:
-============
-By default, the MDK is configured to use the official mapping names from Mojang for methods and fields 
-in the Minecraft codebase. These names are covered by a specific license. All modders should be aware of this
-license. For the latest license text, refer to the mapping file itself, or the reference copy here:
-https://github.com/NeoForged/NeoForm/blob/main/Mojang.md
+This mod adds so far:
+- Headers `#, ##, ###`
+- Centering `=`
+- Horizontal Rule `---`
 
-Additional Resources: 
-==========
-Community Documentation: https://docs.neoforged.net/  
-NeoForged Discord: https://discord.neoforged.net/
+FTB Quests color tags `&a, &2` etc. work with Horizontal Rule and all text.
+
+-------------------------------------------------------
+### Reviews:
+> so cool, 10/10 ~someone\
+> very needed. 9.5/10 ~someone else
+-------------------------------------------------------
+### FAQ:
+Q: Will you port to `<any other version>`?\
+A: Only if I need to.
+
+Q: Will you port to `<any other mod loader>`?\
+A: Only if I need to.
+
+Q: Can I use it in my modpack?\
+A: Feel free to do so!
+
+Q: `<something>` doesn't work!\
+A: Please submit an issue on GitHub.

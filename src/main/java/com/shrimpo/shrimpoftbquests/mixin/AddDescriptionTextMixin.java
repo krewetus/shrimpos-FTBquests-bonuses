@@ -1,27 +1,27 @@
 package com.shrimpo.shrimpoftbquests.mixin;
 
 import com.mojang.datafixers.util.Pair;
-import dev.ftb.mods.ftblibrary.ui.BlankPanel;
-import dev.ftb.mods.ftblibrary.ui.TextField;
-import dev.ftb.mods.ftblibrary.ui.Theme;
-import dev.ftb.mods.ftblibrary.ui.VerticalSpaceWidget;
-import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
-import dev.ftb.mods.ftbquests.client.gui.ImageComponentWidget;
+import com.shrimpo.shrimpoftbquests.client.ADTMHelper;
+import com.shrimpo.shrimpoftbquests.client.HRuleWidget;
+import dev.ftb.mods.ftblibrary.ui.*;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.util.TextUtils;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
+
+import static com.shrimpo.shrimpoftbquests.client.ADTMHelper.stripPrefix;
 
 @Mixin(value = ViewQuestPanel.class, remap = false)
 public abstract class AddDescriptionTextMixin {
@@ -29,14 +29,11 @@ public abstract class AddDescriptionTextMixin {
     @Shadow @Final private List<Pair<Integer, Integer>> pageIndices;
     @Shadow private BlankPanel panelText;
     @Shadow private Quest quest;
-
     @Shadow private int getCurrentPage() { return 0; }
-    @Shadow private ImageComponent findImageComponent(Component c) { return null; }
-    @Shadow private ImageComponentWidget makeImageComponentWidget(ImageComponent img, int idx) { return null; }
 
     @Inject(method = "addDescriptionText", at = @At("HEAD"), cancellable = true)
-    private void shrimposftbquestsbonuses$addDescriptionText(boolean canEdit, Component subtitle, CallbackInfo ci) {
-        ci.cancel();
+    private void addDescriptionText(boolean canEdit, Component subtitle, CallbackInfo callinfo) {
+        callinfo.cancel();
 
         Pair<Integer, Integer> pageSpan = pageIndices.get(getCurrentPage());
         if (!TextUtils.isComponentEmpty(subtitle)) {
@@ -46,24 +43,34 @@ public abstract class AddDescriptionTextMixin {
         for (int i = pageSpan.getFirst(); i <= pageSpan.getSecond() && i < quest.getDescription().size(); i++) {
             Component component = quest.getDescription().get(i);
 
-            ImageComponent img = findImageComponent(component);
-            if (img != null) {
-                panelText.add(makeImageComponentWidget(img, i));
+            boolean center = false;
+            int headerLevel = 0;
+            String plain = component.getString();
+
+            if (ADTMHelper.isHorizontalRule(component)) {
+                panelText.add(new HRuleWidget(panelText, ADTMHelper.extractHRuleColor(component)));
                 continue;
             }
 
-            boolean center = false;
-            String plain = component.getString();
-
-            if (plain.startsWith("<center>")) {
+            if (plain.startsWith("= ")) {
                 center = true;
-                component = stripPrefix(component, "<center>");
-            } else if (plain.startsWith("[center]")) {
-                center = true;
-                component = stripPrefix(component, "[center]");
+                component = stripPrefix(component, "= ");
+            } else if (plain.startsWith("# ")) {
+                headerLevel = 1;
+                component = stripPrefix(component, "# ");
+            } else if (plain.startsWith("## ")) {
+                headerLevel = 2;
+                component = stripPrefix(component, "## ");
+            } else if (plain.startsWith("### ")) {
+                headerLevel = 3;
+                component = stripPrefix(component, "### ");
             }
 
-            // TODO: headings H1 H2 H3 (#, ##, ###) etc
+            if (headerLevel > 0) {
+                component = stripPrefix(component, headerLevel == 3 ? "### " : headerLevel == 2 ? "## " : "# ");
+                addHeader(canEdit, i, component, center, Minecraft.getInstance().font, headerLevel);
+                continue;
+            }
 
             TextField field = new TextField(panelText)
                     .setMaxWidth(panelText.width)
@@ -77,22 +84,35 @@ public abstract class AddDescriptionTextMixin {
         }
     }
 
-    private static Component stripPrefix(Component component, String prefix) {
-        MutableComponent result = Component.empty();
-        boolean[] done = {false};
+    @Unique
+    public void addHeader(boolean canEdit, int line, Component text, boolean center, Font font, int level) {
+        float scale = (level == 1) ? 1.5F : ((level == 2) ? 1.25F : 1.1F);
+        int textColor = (level == 1) ? -1 : ((level == 2) ? -855051 : -4867391);
+        int innerW = this.panelText.width - 6;
+        int centeringWidth = ADTMHelper.getCenteringWidth(font, text);
+        int prefixWidth = ADTMHelper.getWidthNoPrefix(font, text);
+        boolean addLine = (level == 5);
+        int lineColor = 0x44000000 | textColor & 0xFFFFFF;
+        int widgetH = (int)(9.0F * scale) + ((level == 1) ? 6 : 3);
+        int panelW = this.panelText.width;
+        Objects.requireNonNull(font);
 
-        component.visit((style, s) -> {
-            String out = s;
-            if (!done[0] && out.startsWith(prefix)) {
-                out = out.substring(prefix.length());
-                done[0] = true;
-            }
-            if (!out.isEmpty()) {
-                result.append(Component.literal(out).setStyle(style));
-            }
-            return Optional.<Void>empty();
-        }, Style.EMPTY);
-
-        return result;
+        this.panelText.add(new ADTMHelper.HeaderPanel(
+                this.panelText,
+                line,
+                level,
+                scale,
+                textColor,
+                innerW,
+                center,
+                centeringWidth,
+                prefixWidth,
+                addLine,
+                lineColor,
+                canEdit,
+                widgetH,
+                panelW,
+                text
+        ));
     }
 }
