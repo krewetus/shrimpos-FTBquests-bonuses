@@ -6,6 +6,7 @@ import com.shrimpo.shrimpoftbquests.client.ADTMHelper;
 import com.shrimpo.shrimpoftbquests.client.CodeTextField;
 import com.shrimpo.shrimpoftbquests.client.HRuleWidget;
 import dev.ftb.mods.ftblibrary.ui.*;
+import dev.ftb.mods.ftblibrary.util.client.ImageComponent;
 import dev.ftb.mods.ftbquests.client.gui.quests.ViewQuestPanel;
 import dev.ftb.mods.ftbquests.quest.Quest;
 import dev.ftb.mods.ftbquests.util.TextUtils;
@@ -35,6 +36,7 @@ public abstract class AddDescriptionTextMixin {
     @Shadow private Quest quest;
     @Shadow private int getCurrentPage() { return 0; }
 
+
     @Inject(method = "addDescriptionText", at = @At("HEAD"), cancellable = true)
     private void addDescriptionText(boolean canEdit, Component subtitle, CallbackInfo callinfo) {
         callinfo.cancel();
@@ -45,9 +47,16 @@ public abstract class AddDescriptionTextMixin {
         }
 
         Font font = Minecraft.getInstance().font;
+        ViewQuestPanelInvoker self = (ViewQuestPanelInvoker) this; // invoke the images back (they didnt work previously, oopsies)
 
         for (int i = pageSpan.getFirst(); i <= pageSpan.getSecond() && i < quest.getDescription().size(); i++) {
             Component component = quest.getDescription().get(i);
+
+            ImageComponent img = self.invokeFindImageComponent(component);
+            if (img != null) {
+                panelText.add(self.invokeMakeImageComponentWidget(img, i));
+                continue;
+            }
 
             boolean center = Config.CENTER_ALL_DESC.get();
             int headerLevel = 0;

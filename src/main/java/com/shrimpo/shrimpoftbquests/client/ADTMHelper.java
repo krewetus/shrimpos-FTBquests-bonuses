@@ -187,8 +187,16 @@ public class ADTMHelper {
 
         component.visit((style, s) -> {
             StringBuilder seg = new StringBuilder();
-            for (int ci = 0; ci < s.length(); ci++) {
+            int len = s.length();
+            for (int ci = 0; ci < len; ci++) {
                 char c = s.charAt(ci);
+
+                if (c == '\\' && ci + 1 < len && s.charAt(ci + 1) == '`') {
+                    seg.append('`');
+                    ci++; // do not toggle ts please
+                    continue;
+                }
+
                 if (c == '`') {
                     if (!seg.isEmpty()) {
                         result.append(Component.literal(seg.toString()).setStyle(codeStyle(style, inCode[0])));
